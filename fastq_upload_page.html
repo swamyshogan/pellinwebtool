@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequencing Data Analysis Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .upload-label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f7fafc;
+            position: relative;
+        }
+
+        .upload-box:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+
+        .upload-box.dragover {
+            border-color: #667eea;
+            background: #e6f0ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e6fffa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .file-name {
+            color: #2d3748;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-name::before {
+            content: "✓";
+            color: #38a169;
+            font-weight: bold;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .analyze-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .requirements {
+            background: #fffaf0;
+            border-left: 4px solid #f6ad55;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+
+        .requirements h3 {
+            color: #744210;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .requirements ul {
+            color: #744210;
+            font-size: 13px;
+            margin-left: 20px;
+        }
+
+        .requirements li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 Sequencing Analysis Platform</h1>
+            <p>Upload paired-end FASTQ files for analysis</p>
+        </div>
+
+        <div class="upload-section">
+            <label class="upload-label">Read 1 (R1) FASTQ File</label>
+            <div class="upload-box" id="r1-box" onclick="document.getElementById('r1-input').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag to upload R1</div>
+                <div class="upload-subtext">Accepts .fastq, .fq, .fastq.gz files</div>
+            </div>
+            <input type="file" id="r1-input" accept=".fastq,.fq,.fastq.gz,.fq.gz">
+            <div class="file-info" id="r1-info">
+                <div class="file-name" id="r1-name"></div>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <label class="upload-label">Read 2 (R2) FASTQ File</label>
+            <div class="upload-box" id="r2-box" onclick="document.getElementById('r2-input').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click or drag to upload R2</div>
+                <div class="upload-subtext">Accepts .fastq, .fq, .fastq.gz files</div>
+            </div>
+            <input type="file" id="r2-input" accept=".fastq,.fq,.fastq.gz,.fq.gz">
+            <div class="file-info" id="r2-info">
+                <div class="file-name" id="r2-name"></div>
+            </div>
+        </div>
+
+        <button class="analyze-btn" id="analyze-btn" disabled>Analyze Sequences</button>
+
+        <div class="requirements">
+            <h3>📋 Requirements</h3>
+            <ul>
+                <li>Both R1 and R2 files must be uploaded</li>
+                <li>Files should be paired-end reads from the same sample</li>
+                <li>Supported formats: FASTQ, compressed FASTQ (.gz)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let r1File = null;
+        let r2File = null;
+
+        function setupFileInput(inputId, boxId, infoId, nameId, fileVarName) {
+            const input = document.getElementById(inputId);
+            const box = document.getElementById(boxId);
+            const info = document.getElementById(infoId);
+            const name = document.getElementById(nameId);
+
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (fileVarName === 'r1') r1File = file;
+                    else r2File = file;
+                    
+                    name.textContent = file.name;
+                    info.classList.add('active');
+                    checkBothFilesUploaded();
+                }
+            });
+
+            // Drag and drop
+            box.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                box.classList.add('dragover');
+            });
+
+            box.addEventListener('dragleave', () => {
+                box.classList.remove('dragover');
+            });
+
+            box.addEventListener('drop', (e) => {
+                e.preventDefault();
+                box.classList.remove('dragover');
+                
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    if (fileVarName === 'r1') r1File = file;
+                    else r2File = file;
+                    
+                    name.textContent = file.name;
+                    info.classList.add('active');
+                    checkBothFilesUploaded();
+                }
+            });
+        }
+
+        function checkBothFilesUploaded() {
+            const analyzeBtn = document.getElementById('analyze-btn');
+            if (r1File && r2File) {
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        setupFileInput('r1-input', 'r1-box', 'r1-info', 'r1-name', 'r1');
+        setupFileInput('r2-input', 'r2-box', 'r2-info', 'r2-name', 'r2');
+
+        document.getElementById('analyze-btn').addEventListener('click', () => {
+            // Store file names for the next page
+            localStorage.setItem('r1FileName', r1File.name);
+            localStorage.setItem('r2FileName', r2File.name);
+            
+            // Navigate to results page
+            alert('Analysis started! Opening results dashboard...\n\n(In the next artifact, I\'ll create the interactive results page)');
+        });
+    </script>
+</body>
+</html>
